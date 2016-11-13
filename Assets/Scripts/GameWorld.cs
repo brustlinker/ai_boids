@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GameWorld  {
+public class GameWorld  : MonoBehaviour{
 
-	//private 
+	//private
+	public Vector2 crosshair{ get; set; }
+
 }

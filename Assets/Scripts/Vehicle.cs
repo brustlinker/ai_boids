@@ -3,17 +3,22 @@ using System.Collections;
 
 public class Vehicle : MonoBehaviour,MovingEntity {
 
+	//描述自身的物理特性
 	public Vector2 velocity { get; set; }
 	private const float velocityMax=3;
-
 	private const float mass=1;
 
+	//操控
 	private SteeringBehaviors steer;
+
+	//世界
+
 
 	// Use this for initialization
 	void Start () {
 		steer=this.GetComponent<SteeringBehaviors>();
 		steer.agent=this;
+
 
 	}
 	
