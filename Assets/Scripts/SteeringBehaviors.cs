@@ -29,7 +29,7 @@ public class SteeringBehaviors : MonoBehaviour{
 		offset_pursuit     = 0x10000,
 	};
 
-	int flags = (int) behavior_type.flee;
+	int flags = (int) 5;
 
 
 	//权重
@@ -42,6 +42,8 @@ public class SteeringBehaviors : MonoBehaviour{
 	public Vector2 Calculate()
 	{
 		Vector2 force = Vector2.zero;
+
+		/*
 		if (On(behavior_type.seek))
 		{
 			force += Seek( GameWorld.Instance.crossHair) * seekWeight;
@@ -51,6 +53,16 @@ public class SteeringBehaviors : MonoBehaviour{
 		{
 			force += Flee( GameWorld.Instance.crossHair ) * fleeWeight;
 		}
+
+		if (On(behavior_type.arrive))
+		{
+			Debug.Log("dongshen");
+			force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
+		}
+		*/
+		force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
+
+
 		return force;
 	}
 
@@ -77,6 +89,45 @@ public class SteeringBehaviors : MonoBehaviour{
 		return disiredVelocity - agent.velocity;
 	}
 
+
+	enum Deceleration 
+	{ 
+		slow = 3, normal = 2, fast = 1 
+	};
+
+	private Vector2 Arrive(Vector2     TargetPos,
+		Deceleration deceleration)
+	{
+		Vector2 nowPos = new Vector2(this.transform.position.x,this.transform.position.y );
+
+		Vector2 ToTarget = TargetPos - nowPos;
+
+		//calculate the distance to the target
+		float dist = ToTarget.magnitude;
+
+		if (dist > 0)
+		{
+			//because Deceleration is enumerated as an int, this value is required
+			//to provide fine tweaking of the deceleration..
+			const float DecelerationTweaker = 0.3f;
+
+			//calculate the speed required to reach the target given the desired
+			//deceleration
+			float speed =  dist / ((float)deceleration * DecelerationTweaker);     
+
+			//make sure the velocity does not exceed the max
+			speed = Mathf.Min( speed, agent.MaxSpeed() );
+
+			//from here proceed just like Seek except we don't need to normalize 
+			//the ToTarget vector because we have already gone to the trouble
+			//of calculating its length: dist. 
+			Vector2 DesiredVelocity =  ToTarget * speed / dist;
+
+			return ( DesiredVelocity - agent.velocity );
+		}
+
+		return new Vector2(0,0);
+	}
 
 
 }
