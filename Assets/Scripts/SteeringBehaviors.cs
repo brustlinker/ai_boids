@@ -44,14 +44,12 @@ public class SteeringBehaviors : MonoBehaviour{
 		Vector2 force = Vector2.zero;
 		if (On(behavior_type.seek))
 		{
-			//force += Seek( agent.gameWorld.crosshair ) * seekWeight;
-			force += Seek( new Vector2(5,2) ) * seekWeight;
+			force += Seek( GameWorld.Instance.crossHair) * seekWeight;
 		}
 
 		if (On(behavior_type.flee))
 		{
-			//force += Flee( agent.gameWorld.crosshair ) * fleeWeight;
-			force += Flee( new Vector2(5,2) ) * fleeWeight;
+			force += Flee( GameWorld.Instance.crossHair ) * fleeWeight;
 		}
 		return force;
 	}

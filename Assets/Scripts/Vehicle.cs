@@ -18,8 +18,6 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	void Start () {
 		steer=this.GetComponent<SteeringBehaviors>();
 		steer.agent=this;
-
-
 	}
 	
 	// Update is called once per frame
