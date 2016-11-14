@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Vehicle : MonoBehaviour,MovingEntity {
 
@@ -11,7 +12,9 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	//操控
 	private SteeringBehaviors steer;
 
-	//世界
+	//测试用 
+    public Text text;
+
 
 
 	// Use this for initialization
@@ -22,8 +25,13 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	
 	// Update is called once per frame
 	void Update () {
+
+
 		//计算合力
 		Vector2 steeringForce = steer.Calculate();
+
+        //显示合力
+        DisplayForce(steeringForce);
 
 		//计算加速度
 		Vector2 acceleration = steeringForce / mass;
@@ -39,6 +47,12 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		this.transform.position += velocity3*Time.deltaTime;
 
 	}
+
+    private void DisplayForce(Vector2 force)
+    {
+        text.text = force.x.ToString("F2") +":"+ force.y.ToString("F2");
+        //Debug.Log(force.x.ToString("F2") + ":" + force.y.ToString("F2"));
+    }
 
 
 

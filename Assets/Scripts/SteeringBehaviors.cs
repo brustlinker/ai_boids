@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 
@@ -29,7 +30,8 @@ public class SteeringBehaviors : MonoBehaviour{
 		offset_pursuit     = 0x10000,
 	};
 
-	int flags = (int) 5;
+
+    int flags = Convert.ToInt32("1000", 2);
 
 
 	//权重
@@ -41,9 +43,9 @@ public class SteeringBehaviors : MonoBehaviour{
 	/// </summary>
 	public Vector2 Calculate()
 	{
-		Vector2 force = Vector2.zero;
 
-		/*
+		Vector2 force = Vector2.zero;
+		
 		if (On(behavior_type.seek))
 		{
 			force += Seek( GameWorld.Instance.crossHair) * seekWeight;
@@ -56,12 +58,8 @@ public class SteeringBehaviors : MonoBehaviour{
 
 		if (On(behavior_type.arrive))
 		{
-			Debug.Log("dongshen");
 			force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
 		}
-		*/
-		force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
-
 
 		return force;
 	}
@@ -95,16 +93,15 @@ public class SteeringBehaviors : MonoBehaviour{
 		slow = 3, normal = 2, fast = 1 
 	};
 
-	private Vector2 Arrive(Vector2     TargetPos,
-		Deceleration deceleration)
+	private Vector2 Arrive(Vector2 TargetPos,Deceleration deceleration)
 	{
+        //计算目标位置与当前位置的距离
 		Vector2 nowPos = new Vector2(this.transform.position.x,this.transform.position.y );
-
 		Vector2 ToTarget = TargetPos - nowPos;
-
-		//calculate the distance to the target
 		float dist = ToTarget.magnitude;
 
+
+        //如果距离>0
 		if (dist > 0)
 		{
 			//because Deceleration is enumerated as an int, this value is required
@@ -115,7 +112,7 @@ public class SteeringBehaviors : MonoBehaviour{
 			//deceleration
 			float speed =  dist / ((float)deceleration * DecelerationTweaker);     
 
-			//make sure the velocity does not exceed the max
+			//确保不超速
 			speed = Mathf.Min( speed, agent.MaxSpeed() );
 
 			//from here proceed just like Seek except we don't need to normalize 
