@@ -89,6 +89,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
     }
 
 
+
 	//继承的几个方法
 	public float MaxSpeed ()
 	{
