@@ -15,4 +15,10 @@ public class Target : MonoBehaviour {
     {
         return velocity.magnitude;
     }
+
+    public Vector2  getForward()
+    {
+        float radians = Mathf.Atan2( velocity.y , velocity.x );
+        return new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+    }
 }

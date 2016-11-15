@@ -88,6 +88,11 @@ public class Vehicle : MonoBehaviour,MovingEntity {
         return new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
     }
 
+    public float getSpeed()
+    {
+        return velocity.magnitude;
+    }
+
 
 
 	//继承的几个方法

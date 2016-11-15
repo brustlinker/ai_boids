@@ -10,8 +10,8 @@ public class SteeringBehaviors : MonoBehaviour{
 	public Vehicle agent { get; set; }
    
 
-    int flags = Convert.ToInt32("10000", 2);
-
+    //int flags = Convert.ToInt32("10000", 2);
+    int flags = 0x00800;
 
 	//权重
 	float	seekWeight = 1f;
@@ -132,13 +132,14 @@ public class SteeringBehaviors : MonoBehaviour{
     /// <param name="evader">逃避者.</param>
     Vector2 Pursuit(Transform evader)
     {
-        /*
+        Target evaderScript = evader.GetComponent<Target>();
+
         //如果逃避者在前面并且朝向智能体， 智能体科技靠近逃避着的当前状态
         Vector2 ToEvader = evader.position - this.transform.position;
        
-        double RelativeHeading = this.transform.forward.Dot(evader.forward);
+        double RelativeHeading = Vector2.Dot( agent.getForward() , evaderScript.getForward() );
 
-        if ( (ToEvader.Dot(this.transform.forward) > 0) &&  
+        if ( Vector2.Dot(ToEvader , agent.getForward()) > 0 &&  
             (RelativeHeading < -0.95))  //acos(0.95)=18 degs
         {
             return Seek(evader.position);
@@ -148,14 +149,13 @@ public class SteeringBehaviors : MonoBehaviour{
 
         //预测的时间与 逃避者和追逐者的距离成正比
         //与智能体的速度和成反比
-        Target targetScript = evader.GetComponent<Target>();
-        double LookAheadTime = ToEvader.magnitude / 
-            (agent.MaxSpeed + targetScript.Speed());
+
+        float LookAheadTime = ToEvader.magnitude / 
+            (agent.MaxSpeed() + evaderScript.Speed());
 
         //靠近预测的逃避者的位置
-        return Seek(evader.position + targetScript.velocity * LookAheadTime);
-        */
-        return new Vector2(0, 0);
+        return Seek(new Vector2(evader.position.x,evader.position.y) + agent.velocity * LookAheadTime);
+       
     }
 
   
