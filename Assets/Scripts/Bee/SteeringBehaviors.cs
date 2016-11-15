@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using SteeringBehaviorsEnum;
 using UnityEngine.Assertions;
 
@@ -12,13 +13,41 @@ public class SteeringBehaviors : MonoBehaviour{
    
 
     //int flags = Convert.ToInt32("10000", 2);
-    int flags = 0x00800;
+    public int flags = 0x00800;
+    public List<string> behaviorList=new List<string>();
 
 	//权重
 	float	seekWeight = 1f;
 	float	fleeWeight = 1f;
     float   arriveWeight = 1f;
     float   pursuitWeight = 1f;
+    float   evadeWeight = 1f;
+
+    void Start()
+    {
+        //开关
+        if (On(behavior_type.seek))
+        {
+            behaviorList.Add("seek");
+        }
+        if (On(behavior_type.flee))
+        {
+            behaviorList.Add("flee");
+        }
+        if (On(behavior_type.arrive))
+        {
+            behaviorList.Add("arrive");
+        }
+        if (On(behavior_type.pursuit))
+        {
+            behaviorList.Add("pursuit");
+        }
+        if (On(behavior_type.evade))
+        {
+            behaviorList.Add("evade");
+        }
+    }
+
 
 	/// <summary>
 	/// 计算合力
@@ -50,7 +79,7 @@ public class SteeringBehaviors : MonoBehaviour{
 
         if (On(behavior_type.evade))
         {
-            force += Evade(GameWorld.Instance.pursuit);
+            force += Evade(GameWorld.Instance.pursuit) * evadeWeight;
         }
 
 
@@ -166,9 +195,32 @@ public class SteeringBehaviors : MonoBehaviour{
     }
 
 
-    Vector2 Evade(GameObject evader)
+    Vector2 Evade( GameObject pursuer)
     {
-        return new Vector2(0, 0);
+        /* Not necessary to include the check for facing direction this time */
+
+        //计算出来相差向量
+        Vector2 ToPursuer = pursuer.transform.position - this.transform.position;
+
+        //uncomment the following two lines to have Evade only consider pursuers 
+        //within a 'threat range'
+
+        //如果大于威胁距离，不逃跑
+        const float ThreatRange = 100.0f;
+        if (ToPursuer.sqrMagnitude > ThreatRange * ThreatRange) return new Vector2(0,0);
+
+        //the lookahead time is propotional to the distance between the pursuer
+        //and the pursuer; and is inversely proportional to the sum of the
+        //agents' velocities
+        Vehicle agentVehicleScript =agent.GetComponent<Vehicle>();
+        VehicleTool pursuerVehicleToolScript = pursuer.GetComponent<VehicleTool>();
+        float LookAheadTime = ToPursuer.magnitude / 
+            (agentVehicleScript.MaxSpeed() +  pursuerVehicleToolScript.getSpeed());
+
+        //now flee away from predicted future position of the pursuer
+        Vehicle pursuerVehicleScript = pursuer.GetComponent<Vehicle>();
+        Vector2 pursuerPos = new Vector2(pursuer.transform.position.x, pursuer.transform.position.y);
+        return Flee(pursuerPos + pursuerVehicleScript.velocity * LookAheadTime);
     }
 
   
