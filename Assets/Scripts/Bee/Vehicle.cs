@@ -82,6 +82,12 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		}
 	}
 
+    public Vector2  getForward()
+    {
+        float radians = Mathf.Atan2( velocity.y , velocity.x );
+        return new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+    }
+
 
 	//继承的几个方法
 	public float MaxSpeed ()

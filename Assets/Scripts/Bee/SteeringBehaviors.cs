@@ -10,7 +10,7 @@ public class SteeringBehaviors : MonoBehaviour{
 	public Vehicle agent { get; set; }
    
 
-    int flags = Convert.ToInt32("1000", 2);
+    int flags = Convert.ToInt32("10000", 2);
 
 
 	//权重
@@ -158,8 +158,5 @@ public class SteeringBehaviors : MonoBehaviour{
         return new Vector2(0, 0);
     }
 
-    Vector2  getfForward()
-    {
-        return new Vector2(0, 0);
-    }
+  
 }
