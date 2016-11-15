@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
-using SteeringBehaviors;
+using SteeringBehaviorsEnum;
 
 
 
@@ -16,6 +16,8 @@ public class SteeringBehaviors : MonoBehaviour{
 	//权重
 	float	seekWeight = 1f;
 	float	fleeWeight = 1f;
+    float   arriveWeight = 1f;
+    float   pursuitWeight = 1f;
 
 	/// <summary>
 	/// 计算合力
@@ -32,7 +34,7 @@ public class SteeringBehaviors : MonoBehaviour{
 
 		if (On(behavior_type.flee))
 		{
-			force += Flee( GameWorld.Instance.crossHair ) * fleeWeight;
+			force += Flee( GameWorld.Instance.crossHair ) * arriveWeight;
 		}
 
 		if (On(behavior_type.arrive))
@@ -40,9 +42,19 @@ public class SteeringBehaviors : MonoBehaviour{
 			force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
 		}
 
+        if (On(behavior_type.pursuit))
+        {
+            force += Pursuit( GameWorld.Instance.evader.transform ) * pursuitWeight;
+        }
+
+
 		return force;
 	}
 
+    /// <summary>
+    /// 判断是否在bt状态
+    /// </summary>
+    /// <param name="bt">状态.</param>
 	bool On( behavior_type bt )
 	{ 
 		return ( flags & ((int)bt)) == (int)bt;
@@ -143,6 +155,11 @@ public class SteeringBehaviors : MonoBehaviour{
         //靠近预测的逃避者的位置
         return Seek(evader.position + targetScript.velocity * LookAheadTime);
         */
-        return new Vector2(0,0);
+        return new Vector2(0, 0);
+    }
+
+    Vector2  getfForward()
+    {
+        return new Vector2(0, 0);
     }
 }

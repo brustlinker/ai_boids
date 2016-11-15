@@ -16,6 +16,9 @@ public class GameWorld : MonoBehaviour {
 
 
 
+
+
+
 	public Vector2 crossHair { get; set; }
 
 	// Use this for initialization
@@ -24,6 +27,8 @@ public class GameWorld : MonoBehaviour {
 	}
 
 
+
+    public GameObject evader;
 
 	
 	// Update is called once per frame

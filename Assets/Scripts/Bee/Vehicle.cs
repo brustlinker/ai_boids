@@ -26,9 +26,6 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	// Update is called once per frame
 	void Update () {
 
-        //更新朝向
-        UpdateForward();
-
 		//计算合力
 		Vector2 steeringForce = steer.Calculate();
 
@@ -48,17 +45,23 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		Vector3 velocity3 = new Vector3(velocity.x,velocity.y,0 );
 		this.transform.position += velocity3*Time.deltaTime;
 
+        //更新朝向
+        UpdateForward();
 	}
 
     private void UpdateForward()
     {
+        //防止除0错误
+        if (this.velocity.x == 0)
+        {
+            return;
+        }
+ 
         //计算出夹角
-        float radians = Mathf.Atan( this.velocity.y / this.velocity.x );
+        float radians = Mathf.Atan2( this.velocity.y , this.velocity.x );
         //转化为角度
         float degrees = radians * Mathf.Rad2Deg;
-
-        Debug.Log(degrees);
-
+      
         //旋转
         this.transform.rotation=Quaternion.Euler(0,0,degrees);
     }
@@ -66,11 +69,8 @@ public class Vehicle : MonoBehaviour,MovingEntity {
     private void DisplayForce(Vector2 force)
     {
         text.text = force.x.ToString("F2") +":"+ force.y.ToString("F2");
-        //Debug.Log(force.x.ToString("F2") + ":" + force.y.ToString("F2"));
     }
-
-
-
+        
 
 	/// <summary>
 	/// 如果速度大于最大速度，那么截断

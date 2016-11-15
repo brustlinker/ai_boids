@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace SteeringBehaviors
+namespace SteeringBehaviorsEnum
 {
     public enum behavior_type
     {
