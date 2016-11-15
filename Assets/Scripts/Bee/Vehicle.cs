@@ -51,13 +51,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 
     private void UpdateForward()
     {
-        //防止除0错误
-        if (this.velocity.x == 0)
-        {
-            return;
-        }
- 
-        //计算出夹角
+        //计算出夹角(如果利用Atan只能处理1、4象限,而且不用处理除0错误)
         float radians = Mathf.Atan2( this.velocity.y , this.velocity.x );
         //转化为角度
         float degrees = radians * Mathf.Rad2Deg;
