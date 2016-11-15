@@ -49,6 +49,33 @@ public class Vehicle : MonoBehaviour,MovingEntity {
         UpdateForward();
 	}
 
+
+    /// <summary>
+    /// 利用text显示合力的大小
+    /// </summary>
+    /// <param name="force">Force.</param>
+    private void DisplayForce(Vector2 force)
+    {
+        text.text = force.x.ToString("F2") +":"+ force.y.ToString("F2");
+    }
+
+
+    /// <summary>
+    /// 如果速度大于最大速度，那么截断
+    /// </summary>
+    private Vector2 Truncate()
+    {
+        //利用速度的大小的平方来比较，省去了开平方根的消耗时间
+        if(velocity.sqrMagnitude > 2 * velocityMax*velocityMax)
+        {
+            return velocity.normalized * velocityMax;
+        }
+        else
+        {
+            return velocity;
+        }
+    }
+
     private void UpdateForward()
     {
         //计算出夹角(如果利用Atan只能处理1、4象限,而且不用处理除0错误)
@@ -60,28 +87,13 @@ public class Vehicle : MonoBehaviour,MovingEntity {
         this.transform.rotation=Quaternion.Euler(0,0,degrees);
     }
 
-    private void DisplayForce(Vector2 force)
-    {
-        text.text = force.x.ToString("F2") +":"+ force.y.ToString("F2");
-    }
-        
 
-	/// <summary>
-	/// 如果速度大于最大速度，那么截断
-	/// </summary>
-	private Vector2 Truncate()
-	{
-		//利用速度的大小的平方来比较，省去了开平方根的消耗时间
-		if(velocity.sqrMagnitude > 2 * velocityMax*velocityMax)
-		{
-			return velocity.normalized * velocityMax;
-		}
-		else
-		{
-			return velocity;
-		}
-	}
+    //下面这些都是工具类
 
+    /// <summary>
+    /// 获取朝向
+    /// </summary>
+    /// <returns>朝向.</returns>
     public Vector2  getForward()
     {
         float radians = Mathf.Atan2( velocity.y , velocity.x );
