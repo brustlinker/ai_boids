@@ -26,6 +26,8 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	// Update is called once per frame
 	void Update () {
 
+        //更新朝向
+        UpdateForward();
 
 		//计算合力
 		Vector2 steeringForce = steer.Calculate();
@@ -47,6 +49,19 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		this.transform.position += velocity3*Time.deltaTime;
 
 	}
+
+    private void UpdateForward()
+    {
+        //计算出夹角
+        float radians = Mathf.Atan( this.velocity.y / this.velocity.x );
+        //转化为角度
+        float degrees = radians * Mathf.Rad2Deg;
+
+        Debug.Log(degrees);
+
+        //旋转
+        this.transform.rotation=Quaternion.Euler(0,0,degrees);
+    }
 
     private void DisplayForce(Vector2 force)
     {

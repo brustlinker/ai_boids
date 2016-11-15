@@ -1,35 +1,14 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using SteeringBehaviors;
 
 
 
 public class SteeringBehaviors : MonoBehaviour{
 
 	public Vehicle agent { get; set; }
-
-
-	private  enum behavior_type
-	{
-		none               = 0x00000,
-		seek               = 0x00002,
-		flee               = 0x00004,
-		arrive             = 0x00008,
-		wander             = 0x00010,
-		cohesion           = 0x00020,
-		separation         = 0x00040,
-		allignment         = 0x00080,
-		obstacle_avoidance = 0x00100,
-		wall_avoidance     = 0x00200,
-		follow_path        = 0x00400,
-		pursuit            = 0x00800,
-		evade              = 0x01000,
-		interpose          = 0x02000,
-		hide               = 0x04000,
-		flock              = 0x08000,
-		offset_pursuit     = 0x10000,
-	};
-
+   
 
     int flags = Convert.ToInt32("1000", 2);
 
@@ -80,6 +59,10 @@ public class SteeringBehaviors : MonoBehaviour{
 		return disiredVelocity - agent.velocity;
 	}
 
+    /// <summary>
+    /// Flee the specified targetPos.
+    /// </summary>
+    /// <param name="targetPos">Target position.</param>
 	private Vector2 Flee(Vector2 targetPos)
 	{
 		Vector2 nowPos = new Vector2(this.transform.position.x,this.transform.position.y );
@@ -88,11 +71,13 @@ public class SteeringBehaviors : MonoBehaviour{
 	}
 
 
-	enum Deceleration 
-	{ 
-		slow = 3, normal = 2, fast = 1 
-	};
 
+
+    /// <summary>
+    /// Arrive the specified TargetPos .
+    /// </summary>
+    /// <param name="TargetPos">Target position.</param>
+    /// <param name="deceleration">减速的模式</param>
 	private Vector2 Arrive(Vector2 TargetPos,Deceleration deceleration)
 	{
         //计算目标位置与当前位置的距离
@@ -127,4 +112,37 @@ public class SteeringBehaviors : MonoBehaviour{
 	}
 
 
+
+
+    /// <summary>
+    /// Pursuit the specified evader.
+    /// </summary>
+    /// <param name="evader">逃避者.</param>
+    Vector2 Pursuit(Transform evader)
+    {
+        /*
+        //如果逃避者在前面并且朝向智能体， 智能体科技靠近逃避着的当前状态
+        Vector2 ToEvader = evader.position - this.transform.position;
+       
+        double RelativeHeading = this.transform.forward.Dot(evader.forward);
+
+        if ( (ToEvader.Dot(this.transform.forward) > 0) &&  
+            (RelativeHeading < -0.95))  //acos(0.95)=18 degs
+        {
+            return Seek(evader.position);
+        }
+
+        //不在前面额时候，我们预测逃避者的位置
+
+        //预测的时间与 逃避者和追逐者的距离成正比
+        //与智能体的速度和成反比
+        Target targetScript = evader.GetComponent<Target>();
+        double LookAheadTime = ToEvader.magnitude / 
+            (agent.MaxSpeed + targetScript.Speed());
+
+        //靠近预测的逃避者的位置
+        return Seek(evader.position + targetScript.velocity * LookAheadTime);
+        */
+        return new Vector2(0,0);
+    }
 }
