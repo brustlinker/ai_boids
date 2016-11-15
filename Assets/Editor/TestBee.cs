@@ -15,6 +15,7 @@ public class TestBee {
 
         Vehicle vehicle =gameObject.GetComponent<Vehicle>();
  
+        /*
         TestGetForwardOn45(vehicle);
 
         TestGetForwardOn0(vehicle);
@@ -24,9 +25,10 @@ public class TestBee {
         TestGetForwardOn135(vehicle);
 
         TestGetForwardOnNegative60(vehicle);
+        */
 
   	}
-
+    /*
 
     /// <summary>
     /// Tests the getforward  45度角.
@@ -79,6 +81,6 @@ public class TestBee {
         Assert.IsTrue(Mathf.Abs( vehicle.getForward().x+0.8660f) < EPSINON);
         Assert.IsTrue(Mathf.Abs( vehicle.getForward().y-0.5f) < EPSINON);
     }
-
+    */
  
 }

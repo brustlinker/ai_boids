@@ -16,10 +16,10 @@ public class GameWorld : MonoBehaviour {
 
 
 
-
-
-
+    //arrived 的目标
 	public Vector2 crossHair { get; set; }
+    public GameObject evade;
+    public GameObject pursuit;
 
 	// Use this for initialization
 	void Start () {
@@ -28,11 +28,6 @@ public class GameWorld : MonoBehaviour {
 
 
 
-    public GameObject evader;
 
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+   
 }

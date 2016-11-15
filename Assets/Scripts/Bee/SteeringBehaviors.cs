@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using SteeringBehaviorsEnum;
+using UnityEngine.Assertions;
 
 
 
@@ -44,7 +45,12 @@ public class SteeringBehaviors : MonoBehaviour{
 
         if (On(behavior_type.pursuit))
         {
-            force += Pursuit( GameWorld.Instance.evader ) * pursuitWeight;
+            force += Pursuit( GameWorld.Instance.evade ) * pursuitWeight;
+        }
+
+        if (On(behavior_type.evade))
+        {
+            force += Evade(GameWorld.Instance.pursuit);
         }
 
 
@@ -132,14 +138,15 @@ public class SteeringBehaviors : MonoBehaviour{
     /// <param name="evader">逃避者.</param>
     Vector2 Pursuit(GameObject evader)
     {
-        Target evaderScript = evader.GetComponent<Target>();
+        VehicleTool agentVehicleToolScript = agent.GetComponent<VehicleTool>();
+        VehicleTool evaderVehicleToolScript = evader.GetComponent<VehicleTool>();
 
         //如果逃避者在前面并且朝向智能体， 智能体科技靠近逃避着的当前状态
         Vector2 ToEvader = evader.transform.position - this.transform.position;
        
-        double RelativeHeading = Vector2.Dot( agent.getForward() , evaderScript.getForward() );
+        double RelativeHeading = Vector2.Dot( agentVehicleToolScript.getForward() , evaderVehicleToolScript.getForward() );
 
-        if ( Vector2.Dot(ToEvader , agent.getForward()) > 0 &&  
+        if ( Vector2.Dot(ToEvader , agentVehicleToolScript.getForward()) > 0 &&  
             (RelativeHeading < -0.95))  //acos(0.95)=18 degs
         {
             return Seek(evader.transform.position);
@@ -151,11 +158,17 @@ public class SteeringBehaviors : MonoBehaviour{
         //与智能体的速度和成反比
 
         float LookAheadTime = ToEvader.magnitude / 
-            (agent.MaxSpeed() + evaderScript.Speed());
+            (agent.MaxSpeed() + evaderVehicleToolScript.getSpeed());
 
         //靠近预测的逃避者的位置
         return Seek(new Vector2(evader.transform.position.x,evader.transform.position.y) + agent.velocity * LookAheadTime);
        
+    }
+
+
+    Vector2 Evade(GameObject evader)
+    {
+        return new Vector2(0, 0);
     }
 
   

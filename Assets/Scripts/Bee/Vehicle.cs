@@ -88,25 +88,6 @@ public class Vehicle : MonoBehaviour,MovingEntity {
     }
 
 
-    //下面这些都是工具类
-
-    /// <summary>
-    /// 获取朝向
-    /// </summary>
-    /// <returns>朝向.</returns>
-    public Vector2  getForward()
-    {
-        float radians = Mathf.Atan2( velocity.y , velocity.x );
-        return new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
-    }
-
-    public float getSpeed()
-    {
-        return velocity.magnitude;
-    }
-
-
-
 	//继承的几个方法
 	public float MaxSpeed ()
 	{
