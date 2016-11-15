@@ -44,7 +44,7 @@ public class SteeringBehaviors : MonoBehaviour{
 
         if (On(behavior_type.pursuit))
         {
-            force += Pursuit( GameWorld.Instance.evader.transform ) * pursuitWeight;
+            force += Pursuit( GameWorld.Instance.evader ) * pursuitWeight;
         }
 
 
@@ -130,19 +130,19 @@ public class SteeringBehaviors : MonoBehaviour{
     /// Pursuit the specified evader.
     /// </summary>
     /// <param name="evader">逃避者.</param>
-    Vector2 Pursuit(Transform evader)
+    Vector2 Pursuit(GameObject evader)
     {
         Target evaderScript = evader.GetComponent<Target>();
 
         //如果逃避者在前面并且朝向智能体， 智能体科技靠近逃避着的当前状态
-        Vector2 ToEvader = evader.position - this.transform.position;
+        Vector2 ToEvader = evader.transform.position - this.transform.position;
        
         double RelativeHeading = Vector2.Dot( agent.getForward() , evaderScript.getForward() );
 
         if ( Vector2.Dot(ToEvader , agent.getForward()) > 0 &&  
             (RelativeHeading < -0.95))  //acos(0.95)=18 degs
         {
-            return Seek(evader.position);
+            return Seek(evader.transform.position);
         }
 
         //不在前面额时候，我们预测逃避者的位置
@@ -154,7 +154,7 @@ public class SteeringBehaviors : MonoBehaviour{
             (agent.MaxSpeed() + evaderScript.Speed());
 
         //靠近预测的逃避者的位置
-        return Seek(new Vector2(evader.position.x,evader.position.y) + agent.velocity * LookAheadTime);
+        return Seek(new Vector2(evader.transform.position.x,evader.transform.position.y) + agent.velocity * LookAheadTime);
        
     }
 
