@@ -28,6 +28,26 @@ namespace SteeringBehaviorsEnum
     { 
         slow = 3, normal = 2, fast = 1 
     };
+
+    public struct Weight
+    {
+        public float seekWeight;
+        public float fleeWeight;
+        public float arriveWeight;
+        public float pursuitWeight;
+        public float evadeWeight;
+        public float wanderWeight;  
+    };
+
+    public struct WanderParameter
+    {
+        //wander圈的大小
+        public float WanderRadius;
+        //wander突出在智能体前面的距离
+        public float WanderDistance;
+        //每秒加到目标随机位置的最大值
+        public float WanderJitter;
+    }
 }
 
 

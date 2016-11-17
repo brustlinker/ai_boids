@@ -17,13 +17,20 @@ public class SteeringBehaviors : MonoBehaviour{
     public List<string> behaviorList=new List<string>();
 
 	//权重
-	float	seekWeight = 1f;
-	float	fleeWeight = 1f;
-    float   arriveWeight = 1f;
-    float   pursuitWeight = 1f;
-    float   evadeWeight = 1f;
+    Weight weight;
+
+    //wander参数
+    WanderParameter wanderParameter;
+    private Vector2 WanderTarget;
 
     void Start()
+    {
+        InitBehaviorList();
+        InitWeight();
+        InitWanderParameter();
+    }
+
+    void InitBehaviorList()
     {
         //开关
         if (On(behavior_type.seek))
@@ -46,6 +53,35 @@ public class SteeringBehaviors : MonoBehaviour{
         {
             behaviorList.Add("evade");
         }
+        if (On(behavior_type.wander))
+        {
+            behaviorList.Add("wander");
+        }
+    }
+
+    void InitWeight()
+    {
+        weight.seekWeight = 1f;
+        weight.fleeWeight = 1f;
+        weight.arriveWeight = 1f;
+        weight.pursuitWeight = 1f;
+        weight.evadeWeight = 1f;
+        weight.wanderWeight = 1f;
+    }
+
+    void InitWanderParameter()
+    {
+        wanderParameter.WanderDistance = 0.5f;
+        wanderParameter.WanderRadius = 1f;
+        wanderParameter.WanderJitter = 0.3f;
+
+        //stuff for the wander behavior
+
+        float theta = UnityEngine.Random.Range(0f,1f) * 2 * Mathf.PI;
+
+        //create a vector to a target position on the wander circle
+        WanderTarget = new Vector2(wanderParameter.WanderRadius * Mathf.Cos(theta),
+            wanderParameter.WanderRadius * Mathf.Sin(theta));
     }
 
 
@@ -59,27 +95,31 @@ public class SteeringBehaviors : MonoBehaviour{
 		
 		if (On(behavior_type.seek))
 		{
-			force += Seek( GameWorld.Instance.crossHair) * seekWeight;
+            force += Seek( GameWorld.Instance.crossHair) * weight.seekWeight;
 		}
 
 		if (On(behavior_type.flee))
 		{
-			force += Flee( GameWorld.Instance.crossHair ) * arriveWeight;
+            force += Flee( GameWorld.Instance.crossHair ) * weight.fleeWeight;
 		}
 
 		if (On(behavior_type.arrive))
 		{
-			force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * fleeWeight;
+            force += Arrive( GameWorld.Instance.crossHair, Deceleration.slow ) * weight.arriveWeight;
 		}
 
         if (On(behavior_type.pursuit))
         {
-            force += Pursuit( GameWorld.Instance.evade ) * pursuitWeight;
+            force += Pursuit( GameWorld.Instance.evade ) * weight.pursuitWeight;
         }
 
         if (On(behavior_type.evade))
         {
-            force += Evade(GameWorld.Instance.pursuit) * evadeWeight;
+            force += Evade(GameWorld.Instance.pursuit) * weight.evadeWeight;
+        }
+        if (On(behavior_type.wander))
+        {
+            force += Wander() * weight.wanderWeight;
         }
 
 
@@ -195,6 +235,10 @@ public class SteeringBehaviors : MonoBehaviour{
     }
 
 
+    /// <summary>
+    /// Evade the specified pursuer.
+    /// </summary>
+    /// <param name="pursuer">Pursuer.</param>
     Vector2 Evade( GameObject pursuer)
     {
         /* Not necessary to include the check for facing direction this time */
@@ -209,19 +253,81 @@ public class SteeringBehaviors : MonoBehaviour{
         const float ThreatRange = 100.0f;
         if (ToPursuer.sqrMagnitude > ThreatRange * ThreatRange) return new Vector2(0,0);
 
-        //the lookahead time is propotional to the distance between the pursuer
-        //and the pursuer; and is inversely proportional to the sum of the
-        //agents' velocities
+        //预判时间与逃脱这与追击者的移动速度成反比
+        //与两者的距离成正比
         Vehicle agentVehicleScript =agent.GetComponent<Vehicle>();
         VehicleTool pursuerVehicleToolScript = pursuer.GetComponent<VehicleTool>();
         float LookAheadTime = ToPursuer.magnitude / 
             (agentVehicleScript.MaxSpeed() +  pursuerVehicleToolScript.getSpeed());
 
-        //now flee away from predicted future position of the pursuer
+        //从追击者的预判位置为目标进行flee（逃脱）
         Vehicle pursuerVehicleScript = pursuer.GetComponent<Vehicle>();
         Vector2 pursuerPos = new Vector2(pursuer.transform.position.x, pursuer.transform.position.y);
         return Flee(pursuerPos + pursuerVehicleScript.velocity * LookAheadTime);
     }
 
+
+    Vector2 Wander()
+    { 
+        
+        //this behavior is dependent on the update rate, so this line must
+        //be included when using time independent framerate.
+        float JitterThisTimeSlice = wanderParameter.WanderJitter * Time.deltaTime;
+
+        //first, add a small random vector to the target's position
+        WanderTarget += new Vector2(UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice,
+            UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice);
+
+        //reproject this new vector back on to a unit circle
+        WanderTarget.Normalize();
+
+        //increase the length of the vector to the same as the radius
+        //of the wander circle
+        WanderTarget *= wanderParameter.WanderRadius;
+
+        //move the target into a position WanderDist in front of the agent
+        Vector2 target = WanderTarget + new Vector2(wanderParameter.WanderDistance, 0);
+
+        //project the target into world space
+        /*
+        Vector2 Target = PointToWorldSpace(target,
+            this.GetComponent<VehicleTool>().getForward(),
+            this.Side(), 
+            this.transform.position);
+            */
+        Vector2 Target = PointToWorldSpace(target);
+        //and steer towards it
+        Vector2 nowPos=new Vector2( agent.transform.position.x,agent.transform.position.y);
+        return Target - nowPos; 
+
+    }
+
+  
+
+    Vector2 Side()
+    {
+        VehicleTool vehicleToolScript=this.GetComponent<VehicleTool>();
+        Vector2 heading=vehicleToolScript.getForward();
+
+        // ax+by=0;取a=1，b=-ax/y,就是b=-x/y
+
+        //防止除0错误
+        if (heading.y == 0)
+        {
+            return new Vector2(0, 1);
+        }
+        else
+        {
+            return new Vector2( 1, -heading.x / heading.y);
+        }
+
+
+    }
+
+    Vector2 PointToWorldSpace(Vector2 targetLocal)
+    {
+        Vector3 ParentPos = this.transform.position;
+        return new Vector2(targetLocal.x + ParentPos.x, targetLocal.y + ParentPos.y);
+    }
   
 }

@@ -21,7 +21,10 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	void Start () {
 		steer=this.GetComponent<SteeringBehaviors>();
 		steer.agent=this;
+
 	}
+
+
 	
 	// Update is called once per frame
 	void Update () {
@@ -44,6 +47,9 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		//移动
 		Vector3 velocity3 = new Vector3(velocity.x,velocity.y,0 );
 		this.transform.position += velocity3*Time.deltaTime;
+
+        //把屏幕循环循环一下
+        WrapAround();
 
         //更新朝向
         UpdateForward();
@@ -86,6 +92,37 @@ public class Vehicle : MonoBehaviour,MovingEntity {
         //旋转
         this.transform.rotation=Quaternion.Euler(0,0,degrees);
     }
+
+
+    //treat the screen as a toroid
+    void WrapAround( )
+    {
+        Vector2 cameraSize = CameraTool.Instance.GetCameraSizeInUnit();
+        //Rect screen=new Rect(Screen.width);
+        Vector2 nowPos = new Vector2(transform.position.x,transform.position.y);
+        if (nowPos.y > cameraSize.y / 2)
+        {
+            transform.position = new Vector3(nowPos.x, nowPos.y - cameraSize.y, 0);
+        }
+        else if(nowPos.y < - cameraSize.y / 2)
+        {
+            transform.position = new Vector3(nowPos.x, nowPos.y + cameraSize.y, 0);
+        }
+
+        if (nowPos.x > cameraSize.x / 2)
+        {
+            transform.position = new Vector3(nowPos.x-cameraSize.x, nowPos.y, 0);
+
+        }
+        else if(nowPos.x < -cameraSize.x / 2)
+        {
+            transform.position = new Vector3(nowPos.x+cameraSize.x, nowPos.y, 0);
+      
+        };
+
+    }
+
+
 
 
 	//继承的几个方法
