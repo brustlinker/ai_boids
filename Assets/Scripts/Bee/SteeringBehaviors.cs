@@ -80,8 +80,10 @@ public class SteeringBehaviors : MonoBehaviour{
         float theta = UnityEngine.Random.Range(0f,1f) * 2 * Mathf.PI;
 
         //create a vector to a target position on the wander circle
+		/*
         WanderTarget = new Vector2(wanderParameter.WanderRadius * Mathf.Cos(theta),
             wanderParameter.WanderRadius * Mathf.Sin(theta));
+            */
     }
 
 
