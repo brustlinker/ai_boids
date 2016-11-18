@@ -6,7 +6,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 
 	//描述自身的物理特性
 	public Vector2 velocity { get; set; }
-	private const float velocityMax=3;
+	private const float velocityMax=6f;
 	private const float mass=1;
 
 	//操控
@@ -27,7 +27,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 
 		//计算合力
 		Vector2 steeringForce = steer.Calculate();
@@ -39,7 +39,9 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		Vector2 acceleration = steeringForce / mass;
 
 		//计算速度
-		velocity += acceleration*Time.deltaTime;
+        velocity += acceleration*Time.deltaTime;
+
+
 
 		//截断
 		velocity=Truncate();
@@ -54,6 +56,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
         //更新朝向
         UpdateForward();
 	}
+        
 
 
     /// <summary>
@@ -120,6 +123,16 @@ public class Vehicle : MonoBehaviour,MovingEntity {
       
         };
 
+    }
+
+    void OnDrawGizmos()
+    {
+
+        // 设置颜色
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(transform.position,
+            transform.position +
+            new Vector3(velocity.x, velocity.y, 0));
     }
 
 

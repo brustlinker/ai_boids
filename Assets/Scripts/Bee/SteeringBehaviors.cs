@@ -20,6 +20,7 @@ public class SteeringBehaviors : MonoBehaviour{
     Weight weight;
 
     //wander参数
+    private Vector2 wanderTarget;
     WanderParameter wanderParameter;
     private Vector2 WanderTarget;
 
@@ -71,9 +72,9 @@ public class SteeringBehaviors : MonoBehaviour{
 
     void InitWanderParameter()
     {
-        wanderParameter.WanderDistance = 0.5f;
-        wanderParameter.WanderRadius = 1f;
-        wanderParameter.WanderJitter = 0.3f;
+        wanderParameter.WanderDistance = 2f;
+        wanderParameter.WanderRadius = 1.2f;
+        wanderParameter.WanderJitter = 40f;
 
         //stuff for the wander behavior
 
@@ -83,6 +84,7 @@ public class SteeringBehaviors : MonoBehaviour{
         WanderTarget = new Vector2(wanderParameter.WanderRadius * Mathf.Cos(theta),
             wanderParameter.WanderRadius * Mathf.Sin(theta));
     }
+
 
 
 	/// <summary>
@@ -119,7 +121,7 @@ public class SteeringBehaviors : MonoBehaviour{
         }
         if (On(behavior_type.wander))
         {
-            force += Wander() * weight.wanderWeight;
+            force += getWanderForce() * weight.wanderWeight * 50;
         }
 
 
@@ -266,7 +268,12 @@ public class SteeringBehaviors : MonoBehaviour{
         return Flee(pursuerPos + pursuerVehicleScript.velocity * LookAheadTime);
     }
 
-
+    /// <summary>
+    /// Wander 游荡
+    /// 但是目前产生的操控值有点问题，不在圆圈上.
+    /// </summary>
+    /// 
+    /*
     Vector2 Wander()
     { 
         
@@ -274,7 +281,8 @@ public class SteeringBehaviors : MonoBehaviour{
         //be included when using time independent framerate.
         float JitterThisTimeSlice = wanderParameter.WanderJitter * Time.deltaTime;
 
-        //first, add a small random vector to the target's position
+
+        //首先添加一个小随机
         WanderTarget += new Vector2(UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice,
             UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice);
 
@@ -289,16 +297,105 @@ public class SteeringBehaviors : MonoBehaviour{
         Vector2 target = WanderTarget + new Vector2(wanderParameter.WanderDistance, 0);
 
         //project the target into world space
-        /*
+
         Vector2 Target = PointToWorldSpace(target,
             this.GetComponent<VehicleTool>().getForward(),
             this.Side(), 
             this.transform.position);
-            */
         Vector2 Target = PointToWorldSpace(target);
+        wanderTarget = Target;
         //and steer towards it
         Vector2 nowPos=new Vector2( agent.transform.position.x,agent.transform.position.y);
         return Target - nowPos; 
+
+    }
+    */
+
+
+
+    Vector2 getWanderForce()
+    {
+        //这个东西与更新频率有关, so this line must
+        //be included when using time independent framerate.
+        float jitterThisTimeSlice = wanderParameter.WanderJitter * Time.deltaTime;
+
+        //首先添加一个小随机
+        Vector2 randomVector2= new Vector2(UnityEngine.Random.Range(-1f,1f) * jitterThisTimeSlice,
+            UnityEngine.Random.Range(-1f,1f) * jitterThisTimeSlice);
+
+        //计算新的朝向点
+        Vector2 newHeadingPoint=getHeadingCirclePoint()+randomVector2;
+
+        //计算出投影到圆上的点
+        Vector2 nowPos = new Vector2(transform.position.x,transform.position.y);
+        Vector2 newHeadingPointFromCenter = newHeadingPoint - nowPos;
+        Vector2 newHeadingCirclePoint = newHeadingPointFromCenter.normalized * wanderParameter.WanderRadius;
+
+        return newHeadingCirclePoint ;
+    }
+
+
+    /// <summary>
+    /// 计算出朝向与操控圆圈的交点
+    /// </summary>
+    /// <returns>The heading circle point.</returns>
+    Vector2 getHeadingCirclePoint()
+    {
+        //计算交点
+        Vector2 nowPos = new Vector2(transform.position.x,transform.position.y);
+
+        VehicleTool vehicleToolScript = this.GetComponent<VehicleTool>();
+        Vector2 forward=vehicleToolScript.getForward();
+
+        return new Vector2(nowPos.x + wanderParameter.WanderRadius * forward.y, 
+            nowPos.y + wanderParameter.WanderRadius * forward.x);
+
+    }
+
+    void OnDrawGizmos()
+    {
+
+        // 设置颜色
+        Gizmos.color = Color.green;
+
+        //计算绘制圆圈的中心偏移量
+        //移动距离
+        VehicleTool vehicleToolScript = this.GetComponent<VehicleTool>();
+        Vector2 forward=vehicleToolScript.getForward();
+        Vector3 offset = new Vector3(wanderParameter.WanderDistance * forward.y,
+            wanderParameter.WanderDistance * forward.x,0);
+        
+        // 绘制圆环
+        Vector3 beginPoint =   transform.position;
+        Vector3 firstPoint =   transform.position;
+
+        //转一圈
+        float m_Theta = 0.1f;
+        for (float theta = 0; theta < 2 * Mathf.PI; theta += m_Theta)
+        {
+            //计算
+            float x = wanderParameter.WanderRadius * Mathf.Cos(theta);
+            float y = wanderParameter.WanderRadius * Mathf.Sin(theta);
+
+            Vector3 endPoint = transform.position +offset + new Vector3(x , y, 0);
+            if (theta == 0)
+            {
+                firstPoint = endPoint;
+            }
+            else
+            {
+                Gizmos.DrawLine(beginPoint, endPoint);
+            }
+            beginPoint = endPoint;
+        }
+
+        // 绘制最后一条线段
+        Gizmos.DrawLine(firstPoint, beginPoint);
+
+        //再话一条直线
+        Vector2 wanderForce=getWanderForce()+new Vector2(offset.x,offset.y);
+        Vector3 wanderPoint = new Vector3(wanderForce.x,wanderForce.y)+transform.position;
+        Gizmos.DrawLine(transform.position, wanderPoint );
 
     }
 
