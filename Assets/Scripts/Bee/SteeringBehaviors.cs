@@ -22,7 +22,6 @@ public class SteeringBehaviors : MonoBehaviour{
     //wander参数
     private Vector2 wanderTarget;
     WanderParameter wanderParameter;
-    private Vector2 WanderTarget;
 
     void Start()
     {
@@ -74,7 +73,7 @@ public class SteeringBehaviors : MonoBehaviour{
     {
         wanderParameter.WanderDistance = 2f;
         wanderParameter.WanderRadius = 1.2f;
-        wanderParameter.WanderJitter = 40f;
+        wanderParameter.WanderJitter = 50f;
 
         //stuff for the wander behavior
 

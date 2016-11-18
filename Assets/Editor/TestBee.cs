@@ -15,7 +15,7 @@ public class TestBee {
 
         Vehicle vehicle =gameObject.GetComponent<Vehicle>();
  
-        /*
+
         TestGetForwardOn45(vehicle);
 
         TestGetForwardOn0(vehicle);
@@ -25,10 +25,10 @@ public class TestBee {
         TestGetForwardOn135(vehicle);
 
         TestGetForwardOnNegative60(vehicle);
-        */
+
 
   	}
-    /*
+
 
     /// <summary>
     /// Tests the getforward  45度角.
@@ -37,8 +37,9 @@ public class TestBee {
     void TestGetForwardOn45(Vehicle vehicle)
     {
         vehicle.velocity = new Vector2(1,1);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().x-0.7071f) < EPSINON);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().y-0.7071f) < EPSINON);
+        VehicleTool vehicleScript=vehicle.GetComponent<VehicleTool>();
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().x-0.7071f) < EPSINON);
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().y-0.7071f) < EPSINON);
     }
 
     /// <summary>
@@ -48,8 +49,9 @@ public class TestBee {
     void TestGetForwardOn0(Vehicle vehicle)
     {
         vehicle.velocity = new Vector2(1,0);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().x-0f) < EPSINON);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().y-1f) < EPSINON);
+        VehicleTool vehicleScript=vehicle.GetComponent<VehicleTool>();
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().x-0f) < EPSINON);
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().y-1f) < EPSINON);
     }
 
     /// <summary>
@@ -59,8 +61,9 @@ public class TestBee {
     void TestGetForwardOn225(Vehicle vehicle)
     {
         vehicle.velocity = new Vector2(-1,-1);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().x+0.7071f) < EPSINON);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().y+0.7071f) < EPSINON);
+        VehicleTool vehicleScript=vehicle.GetComponent<VehicleTool>();
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().x+0.7071f) < EPSINON);
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().y+0.7071f) < EPSINON);
     }
 
 
@@ -71,16 +74,18 @@ public class TestBee {
     void TestGetForwardOn135(Vehicle vehicle)
     {
         vehicle.velocity = new Vector2(-1.7320f,1f);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().x-0.5f) < EPSINON);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().y+0.8660f) < EPSINON);
+        VehicleTool vehicleScript=vehicle.GetComponent<VehicleTool>();
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().x-0.5f) < EPSINON);
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().y+0.8660f) < EPSINON);
     }
 
     void TestGetForwardOnNegative60(Vehicle vehicle)
     {
         vehicle.velocity = new Vector2(1f,-1.7320f);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().x+0.8660f) < EPSINON);
-        Assert.IsTrue(Mathf.Abs( vehicle.getForward().y-0.5f) < EPSINON);
+        VehicleTool vehicleScript=vehicle.GetComponent<VehicleTool>();
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().x+0.8660f) < EPSINON);
+        Assert.IsTrue(Mathf.Abs( vehicleScript.getForward().y-0.5f) < EPSINON);
     }
-    */
+   
  
 }
