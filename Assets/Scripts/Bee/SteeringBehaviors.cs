@@ -22,6 +22,7 @@ public class SteeringBehaviors : MonoBehaviour{
     //wander参数
     private Vector2 wanderTarget;
     WanderParameter wanderParameter;
+	float wanderTheta;
 
     void Start()
     {
@@ -71,19 +72,18 @@ public class SteeringBehaviors : MonoBehaviour{
 
     void InitWanderParameter()
     {
-        wanderParameter.WanderDistance = 2f;
-        wanderParameter.WanderRadius = 1.2f;
-        wanderParameter.WanderJitter = 50f;
+        wanderParameter.Distance = 2f;
+        wanderParameter.Radius = 1.5f;
+        wanderParameter.WanderJitter = 100f;
+		wanderParameter.AngleChange = Mathf.PI;
+
 
         //stuff for the wander behavior
 
-        float theta = UnityEngine.Random.Range(0f,1f) * 2 * Mathf.PI;
+        wanderTheta = UnityEngine.Random.Range(0f,1f) * 2 * Mathf.PI;
 
-        //create a vector to a target position on the wander circle
-		/*
-        WanderTarget = new Vector2(wanderParameter.WanderRadius * Mathf.Cos(theta),
-            wanderParameter.WanderRadius * Mathf.Sin(theta));
-            */
+
+            
     }
 
 
@@ -122,7 +122,7 @@ public class SteeringBehaviors : MonoBehaviour{
         }
         if (On(behavior_type.wander))
         {
-            force += getWanderForce() * weight.wanderWeight * 50;
+			force += Wander() * weight.wanderWeight*20;
         }
 
 
@@ -274,43 +274,44 @@ public class SteeringBehaviors : MonoBehaviour{
     /// 但是目前产生的操控值有点问题，不在圆圈上.
     /// </summary>
     /// 
-    /*
+    
     Vector2 Wander()
     { 
-        
-        //this behavior is dependent on the update rate, so this line must
-        //be included when using time independent framerate.
-        float JitterThisTimeSlice = wanderParameter.WanderJitter * Time.deltaTime;
+		// Calculate the circle center
+		Vector2 circleCenter = new Vector2(agent.velocity.x,agent.velocity.y);
+		circleCenter.Normalize();
+		circleCenter*=wanderParameter.Distance;
+
+		// Calculate the displacement force
+		Vector2 displacement = new Vector2(0, -1);
+		displacement*=wanderParameter.Radius;
+
+		//
+		// Randomly change the vector direction
+		// by making it change its current angle
+		displacement=setAngle(displacement, wanderTheta);
 
 
-        //首先添加一个小随机
-        WanderTarget += new Vector2(UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice,
-            UnityEngine.Random.Range(-1,1) * JitterThisTimeSlice);
+		//
+		// Change wanderAngle just a bit, so it
+		// won't have the same value in the
+		// next game frame.
+		wanderTheta += UnityEngine.Random.Range(-1f,1f) * wanderParameter.AngleChange;
 
-        //reproject this new vector back on to a unit circle
-        WanderTarget.Normalize();
 
-        //increase the length of the vector to the same as the radius
-        //of the wander circle
-        WanderTarget *= wanderParameter.WanderRadius;
+		// Finally calculate and return the wander force
+		Vector2 wanderForce = circleCenter+displacement;
 
-        //move the target into a position WanderDist in front of the agent
-        Vector2 target = WanderTarget + new Vector2(wanderParameter.WanderDistance, 0);
-
-        //project the target into world space
-
-        Vector2 Target = PointToWorldSpace(target,
-            this.GetComponent<VehicleTool>().getForward(),
-            this.Side(), 
-            this.transform.position);
-        Vector2 Target = PointToWorldSpace(target);
-        wanderTarget = Target;
-        //and steer towards it
-        Vector2 nowPos=new Vector2( agent.transform.position.x,agent.transform.position.y);
-        return Target - nowPos; 
+		return  wanderForce;
 
     }
-    */
+    
+	Vector2 setAngle( Vector2 vector,float angle) {
+		var length= vector.magnitude;
+		vector.x = Mathf.Cos(angle) * length;
+		vector.y = Mathf.Sin(angle) * length;
+		return vector;
+	}
 
 
 
@@ -321,7 +322,7 @@ public class SteeringBehaviors : MonoBehaviour{
         float jitterThisTimeSlice = wanderParameter.WanderJitter * Time.deltaTime;
 
         //首先添加一个小随机
-        Vector2 randomVector2= new Vector2(UnityEngine.Random.Range(-1f,1f) * jitterThisTimeSlice,
+        Vector2 randomVector2 = new Vector2(UnityEngine.Random.Range(-1f,1f) * jitterThisTimeSlice,
             UnityEngine.Random.Range(-1f,1f) * jitterThisTimeSlice);
 
         //计算新的朝向点
@@ -330,9 +331,17 @@ public class SteeringBehaviors : MonoBehaviour{
         //计算出投影到圆上的点
         Vector2 nowPos = new Vector2(transform.position.x,transform.position.y);
         Vector2 newHeadingPointFromCenter = newHeadingPoint - nowPos;
-        Vector2 newHeadingCirclePoint = newHeadingPointFromCenter.normalized * wanderParameter.WanderRadius;
+        Vector2 newHeadingCirclePoint = newHeadingPointFromCenter.normalized * wanderParameter.Radius;
 
-        return newHeadingCirclePoint ;
+
+		//计算绘制圆圈的中心偏移量
+		//移动距离
+		VehicleTool vehicleToolScript = this.GetComponent<VehicleTool>();
+		Vector2 forward=vehicleToolScript.getForward();
+		Vector2 offset = new Vector3(wanderParameter.Distance * forward.y,
+			wanderParameter.Distance * forward.x);
+		
+		return newHeadingCirclePoint + offset;
     }
 
 
@@ -348,8 +357,8 @@ public class SteeringBehaviors : MonoBehaviour{
         VehicleTool vehicleToolScript = this.GetComponent<VehicleTool>();
         Vector2 forward=vehicleToolScript.getForward();
 
-        return new Vector2(nowPos.x + wanderParameter.WanderRadius * forward.y, 
-            nowPos.y + wanderParameter.WanderRadius * forward.x);
+        return new Vector2(nowPos.x + wanderParameter.Radius * forward.y, 
+            nowPos.y + wanderParameter.Radius * forward.x);
 
     }
 
@@ -363,8 +372,8 @@ public class SteeringBehaviors : MonoBehaviour{
         //移动距离
         VehicleTool vehicleToolScript = this.GetComponent<VehicleTool>();
         Vector2 forward=vehicleToolScript.getForward();
-        Vector3 offset = new Vector3(wanderParameter.WanderDistance * forward.y,
-            wanderParameter.WanderDistance * forward.x,0);
+        Vector3 offset = new Vector3(wanderParameter.Distance * forward.y,
+            wanderParameter.Distance * forward.x,0);
         
         // 绘制圆环
         Vector3 beginPoint =   transform.position;
@@ -375,8 +384,8 @@ public class SteeringBehaviors : MonoBehaviour{
         for (float theta = 0; theta < 2 * Mathf.PI; theta += m_Theta)
         {
             //计算
-            float x = wanderParameter.WanderRadius * Mathf.Cos(theta);
-            float y = wanderParameter.WanderRadius * Mathf.Sin(theta);
+            float x = wanderParameter.Radius * Mathf.Cos(theta);
+            float y = wanderParameter.Radius * Mathf.Sin(theta);
 
             Vector3 endPoint = transform.position +offset + new Vector3(x , y, 0);
             if (theta == 0)
@@ -394,9 +403,8 @@ public class SteeringBehaviors : MonoBehaviour{
         Gizmos.DrawLine(firstPoint, beginPoint);
 
         //再话一条直线
-        Vector2 wanderForce=getWanderForce()+new Vector2(offset.x,offset.y);
-        Vector3 wanderPoint = new Vector3(wanderForce.x,wanderForce.y)+transform.position;
-        Gizmos.DrawLine(transform.position, wanderPoint );
+		Vector2 wanderForce=Wander();
+		Gizmos.DrawLine(transform.position, transform.position + new Vector3(wanderForce.x,wanderForce.y,0));
 
     }
 

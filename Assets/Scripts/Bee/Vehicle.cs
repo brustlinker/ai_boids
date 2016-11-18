@@ -7,6 +7,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	//描述自身的物理特性
 	public Vector2 velocity { get; set; }
 	private const float velocityMax=6f;
+	private const float forceMax =24f;
 	private const float mass=1;
 
 	//操控
@@ -22,6 +23,9 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		steer=this.GetComponent<SteeringBehaviors>();
 		steer.agent=this;
 
+		//随机一个速度
+		velocity = new Vector2(velocityMax,0f);
+
 	}
 
 
@@ -32,8 +36,13 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 		//计算合力
 		Vector2 steeringForce = steer.Calculate();
 
-        //显示合力
-        DisplayForce(steeringForce);
+        //截断合力
+		steeringForce=TruncateForce(steeringForce);
+
+		//显示合力
+		DisplayForce(steeringForce);
+
+		Debug.Log(steeringForce.x+"  "+steeringForce.y);
 
 		//计算加速度
 		Vector2 acceleration = steeringForce / mass;
@@ -44,7 +53,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 
 
 		//截断
-		velocity=Truncate();
+		velocity=TruncateSpeed();
 
 		//移动
 		Vector3 velocity3 = new Vector3(velocity.x,velocity.y,0 );
@@ -58,6 +67,18 @@ public class Vehicle : MonoBehaviour,MovingEntity {
 	}
         
 
+	private Vector2 TruncateForce(Vector2 force)
+	{
+		//利用速度的大小的平方来比较，省去了开平方根的消耗时间
+		if(force.sqrMagnitude > 2 * forceMax*forceMax)
+		{
+			return force.normalized * forceMax;
+		}
+		else
+		{
+			return force;
+		}
+	}
 
     /// <summary>
     /// 利用text显示合力的大小
@@ -72,7 +93,7 @@ public class Vehicle : MonoBehaviour,MovingEntity {
     /// <summary>
     /// 如果速度大于最大速度，那么截断
     /// </summary>
-    private Vector2 Truncate()
+    private Vector2 TruncateSpeed()
     {
         //利用速度的大小的平方来比较，省去了开平方根的消耗时间
         if(velocity.sqrMagnitude > 2 * velocityMax*velocityMax)
@@ -123,16 +144,6 @@ public class Vehicle : MonoBehaviour,MovingEntity {
       
         };
 
-    }
-
-    void OnDrawGizmos()
-    {
-
-        // 设置颜色
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position,
-            transform.position +
-            new Vector3(velocity.x, velocity.y, 0));
     }
 
 
