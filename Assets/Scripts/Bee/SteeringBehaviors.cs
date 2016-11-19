@@ -23,6 +23,8 @@ public class SteeringBehaviors : MonoBehaviour{
     private Vector2 wanderTarget;
     WanderParameter wanderParameter;
 	float wanderTheta;
+	float now;
+	Vector2 lastWanderForce;
 
     void Start()
     {
@@ -277,6 +279,29 @@ public class SteeringBehaviors : MonoBehaviour{
     
     Vector2 Wander()
     { 
+		//计算时间
+		now+=Time.deltaTime;
+
+		//达到定时器时间
+		if(now>0.5f)
+		{
+			Vector2 wanderForce=getWanderForceVector();
+			now=0;
+			lastWanderForce=wanderForce;
+			return wanderForce;
+		}
+		//返回上一次力
+		else
+		{
+			return lastWanderForce;
+		}
+
+
+
+    }
+
+	Vector2 getWanderForceVector()
+	{
 		// Calculate the circle center
 		Vector2 circleCenter = new Vector2(agent.velocity.x,agent.velocity.y);
 		circleCenter.Normalize();
@@ -303,8 +328,7 @@ public class SteeringBehaviors : MonoBehaviour{
 		Vector2 wanderForce = circleCenter+displacement;
 
 		return  wanderForce;
-
-    }
+	}
     
 	Vector2 setAngle( Vector2 vector,float angle) {
 		var length= vector.magnitude;
